@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://raunak1089.github.io/all_scripts/stat_script.js"></script>
+    <title>PPD Predict</title>
+</head>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+  }
+  
+  form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    max-width: 500px;
+    width: 100%;
+  }
+
+  fieldset {
+    margin-bottom: 20px;
+  }
+
+  legend {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  input[type="radio"] {
+    margin-right: 5px;
+  }
+
+  #result-box {
+    position: fixed;
+    bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<form action="/submit-form" method="post">
+  <fieldset>
+    <legend>Age</legend>
+    <label><input type="radio" name="age" value="25-30"> 25-30</label><br>
+    <label><input type="radio" name="age" value="30-35"> 30-35</label><br>
+    <label><input type="radio" name="age" value="35-40"> 35-40</label><br>
+    <label><input type="radio" name="age" value="40-45"> 40-45</label><br>
+    <label><input type="radio" name="age" value="45-50"> 45-50</label><br>
+  </fieldset>
+  
+  <fieldset>
+    <legend>Sadness</legend>
+    <label><input type="radio" name="sadness" value="Yes"> Yes</label><br>
+    <label><input type="radio" name="sadness" value="Sometimes"> Sometimes</label><br>
+    <label><input type="radio" name="sadness" value="No"> No</label><br>
+  </fieldset>
+
+  <fieldset>
+    <legend>Dysphoria</legend>
+    <label><input type="radio" name="dysphoria" value="Yes"> Yes</label><br>
+    <label><input type="radio" name="dysphoria" value="Sometimes"> Sometimes</label><br>
+    <label><input type="radio" name="dysphoria" value="No"> No</label><br>
+  </fieldset>
+
+  <fieldset>
+    <legend>Insomnia</legend>
+    <label><input type="radio" name="insomnia" value="Yes"> Yes</label><br>
+    <label><input type="radio" name="insomnia" value="Two or more days a week"> Two or more days a week</label><br>
+    <label><input type="radio" name="insomnia" value="No"> No</label><br>
+  </fieldset>
+
+  <fieldset>
+    <legend>Cognitive Impairment</legend>
+    <label><input type="radio" name="cognitive_impairment" value="Yes"> Yes</label><br>
+    <label><input type="radio" name="cognitive_impairment" value="Often"> Often</label><br>
+    <label><input type="radio" name="cognitive_impairment" value="No"> No</label><br>
+  </fieldset>
+
+  <fieldset>
+    <legend>Anorexia</legend>
+    <label><input type="radio" name="anorexia" value="Yes"> Yes</label><br>
+    <label><input type="radio" name="anorexia" value="No"> No</label><br>
+    <label><input type="radio" name="anorexia" value="Not at all"> Not at all</label><br>
+  </fieldset>
+
+  <fieldset>
+    <legend>Guilt Complex</legend>
+    <label><input type="radio" name="guilt_complex" value="Yes"> Yes</label><br>
+    <label><input type="radio" name="guilt_complex" value="Maybe"> Maybe</label><br>
+    <label><input type="radio" name="guilt_complex" value="No"> No</label><br>
+  </fieldset>
+
+  <fieldset>
+    <legend>Attachment Disorder</legend>
+    <label><input type="radio" name="attachment_disorder" value="Yes"> Yes</label><br>
+    <label><input type="radio" name="attachment_disorder" value="Sometimes"> Sometimes</label><br>
+    <label><input type="radio" name="attachment_disorder" value="No"> No</label><br>
+  </fieldset>
+
+  <fieldset>
+    <legend>Suicidal Tendency</legend>
+    <label><input type="radio" name="suicidal_tendency" value="Yes"> Yes</label><br>
+    <label><input type="radio" name="suicidal_tendency" value="Not interested to say"> Not interested to say</label><br>
+    <label><input type="radio" name="suicidal_tendency" value="No"> No</label><br>
+  </fieldset>
+</form>
+
+<div id="result-box"></div>
+
+<script>
+    function ReLU(x) {
+      return Math.max(0, x);
+    }
+    function vectorReLU(vect) {
+      let row_arr = Matrix.transpose(vect);
+      row_arr[0] = row_arr[0].map((x) => Math.max(0, x));
+      return Matrix.transpose(row_arr);
+    }
+    function softMax(vect) {
+      let row_arr = Matrix.transpose(vect);
+      let expsum = 0;
+      for(e of row_arr[0]) expsum += Math.exp(e);
+      row_arr[0] = row_arr[0].map((x) => Math.exp(x)/expsum);
+      return Matrix.transpose(row_arr);
+    }
+    function argMax(vect) {
+      let row_arr = Matrix.transpose(vect);
+      let maxIndex = row_arr[0].indexOf(Math.max(...row_arr[0]));
+      let new_vect = Array(row_arr[0].length).fill(0);
+      new_vect[maxIndex] = 1;
+      return Matrix.transpose([new_vect]);
+    }
+
+
+
+let weights = [
+[[-0.057135555893182755, -0.10624280571937561, -0.6063292026519775, -0.08298645913600922, 0.3381268382072449, -0.3069920539855957, -0.3670561611652374, 0.4149527847766876], [0.08206070959568024, -0.28654682636260986, -0.5074042677879333, -0.03328857943415642, 0.005310154519975185, -0.2080189734697342, 0.15701214969158173, -0.3738054931163788], [-0.03707747533917427, 0.5671447515487671, -0.5806512832641602, 0.33921998739242554, -0.3916245698928833, 0.47380608320236206, -0.07507085800170898, 0.19046881794929504], [-0.360790878534317, -0.1253458708524704, -0.34162166714668274, 0.0789518728852272, 0.03270190581679344, 0.7919256687164307, 0.3746718466281891, -0.02403734251856804], [0.7057982087135315, 0.43122392892837524, -0.4120244085788727, 0.47294074296951294, 0.10093383491039276, -0.24349787831306458, -0.1777515709400177, -0.2717915177345276], [0.4603777229785919, 0.2122197151184082, 0.30332985520362854, 0.31930896639823914, -0.23989653587341309, -0.1843862235546112, 0.6024265885353088, 0.6183863878250122], [0.8961086273193359, 0.21446570754051208, 0.06114097312092781, -0.4827607274055481, 0.833325982093811, 0.34961819648742676, 0.21480324864387512, -0.8843563795089722], [-0.8548339605331421, -1.0946468114852905, 0.007387186400592327, 0.43389326333999634, -0.07862555235624313, 0.49707770347595215, 0.43323275446891785, -0.13237880170345306], [-0.14872923493385315, 0.711861252784729, -0.2500888407230377, -0.44149041175842285, 0.40593305230140686, -0.08903545141220093, 0.45083025097846985, 0.4533625841140747]],
+[[0.34157633781433105, -0.1940053105354309, 1.1616153717041016, -0.7856008410453796, -0.4067502021789551, 0.5608357787132263, -0.31882286071777344, -0.5878323316574097], [0.11422155052423477, -0.8523509502410889, 0.26360994577407837, -0.35896506905555725, 0.8054832816123962, -0.9767693877220154, 0.28075656294822693, 0.01291064452379942], [0.4715549647808075, -0.04529746621847153, 0.16663286089897156, 0.26348042488098145, 0.25618502497673035, -0.4575171172618866, 0.055866070091724396, -0.2611348628997803], [0.5429717302322388, 0.5912613272666931, -0.5653764009475708, -0.42915159463882446, 0.34728512167930603, -0.06519165635108948, -0.19494521617889404, -0.542110025882721], [-0.5391154885292053, -0.31052735447883606, -0.04885810986161232, -0.2042372226715088, -0.039375368505716324, -0.30014461278915405, 0.20010611414909363, 0.035472359508275986], [-0.2721741199493408, -0.17947468161582947, 0.31035590171813965, 0.4797731637954712, -0.12952525913715363, 0.4430273175239563, 0.42064446210861206, 0.0431867279112339], [-0.842373788356781, -0.0075238668359816074, 0.015738483518362045, 0.7735448479652405, 0.25938349962234497, 0.36979663372039795, -0.5865007042884827, -0.24269121885299683], [0.03539275377988815, 0.048435501754283905, 0.35207194089889526, -0.08403323590755463, 0.6324464082717896, 0.7107283473014832, 0.8866323232650757, -0.6086878776550293]],
+[[-0.5278643369674683, 0.5902161598205566, 0.5078057050704956, -1.5116674900054932, -0.23404231667518616, 1.1428449153900146, -0.2918987274169922, 0.4928353726863861], [-0.6601487994194031, -1.1628715991973877, 0.47231525182724, 0.3330311179161072, -0.4541324973106384, 0.9962432384490967, -0.14561858773231506, -0.03330298513174057], [-0.7727863788604736, 0.5515866875648499, 0.06975594907999039, 0.3376576602458954, 0.2842479944229126, 0.6084699630737305, -0.5509268045425415, -1.0605388879776], [0.061620473861694336, -0.8454902768135071, 0.1378556340932846, -0.5639283061027527, -0.04152645543217659, 0.03977252542972565, -0.19658401608467102, -0.1162683293223381], [0.36323782801628113, -0.4917249083518982, 0.5968828797340393, -0.6504205465316772, 0.40905025601387024, -0.6215268969535828, -0.24983716011047363, -0.17028255760669708], [-0.5542042255401611, 0.20855924487113953, -0.8055099248886108, 1.1497024297714233, 0.16051837801933289, 0.5723831653594971, -0.3628099262714386, 0.03258216008543968], [0.4049423933029175, 0.432739794254303, 0.31090566515922546, 0.10766968876123428, 0.1757705807685852, -0.8170760273933411, -0.3013496696949005, 0.3498857021331787], [-0.07384542375802994, 0.4992677569389343, -0.19621270895004272, 0.230960413813591, 0.5564252138137817, -0.3289705514907837, 0.08532541990280151, -0.44398415088653564]],
+[[-0.726902961730957, 1.27431058883667], [0.9354495406150818, -0.4165255129337311], [-0.39912304282188416, 0.3466244339942932], [0.6988528966903687, -1.6424663066864014], [0.468895822763443, 0.30391910672187805], [-0.8427553772926331, 1.784011960029602], [0.3669307231903076, -0.45590928196907043], [-1.504134178161621, 0.9440925121307373]],
+]
+
+let biases = [
+[[-0.14655157923698425, -0.15127308666706085, -0.16454817354679108, 0.31469857692718506, 0.3029820919036865, 0.149319589138031, -0.5902612209320068, 0.4764571189880371]],
+[[0.21407204866409302, 0.21695923805236816, -0.20148669183254242, 0.008529238402843475, 0.001598404604010284, -0.21969617903232574, 0.817557692527771, -0.032557953149080276]],
+[[0.4212448298931122, 0.15175677835941315, 0.2686325013637543, 0.2563285827636719, -0.056175291538238525, -0.06971834599971771, 0.0, 0.3941809833049774]],
+[[-0.1464017927646637, 0.14640162885189056]],
+]
+  
+  weights = weights.map(matrix => Matrix.transpose(matrix));
+  biases = biases.map(matrix => Matrix.transpose(matrix));
+
+
+    let layers = [weights[0][0].length, ...weights.map(matrix => matrix.length)];
+
+    function neural_network(input, w, b) {
+      let input_vector = Matrix.transpose([input]);
+      for (i = 0; i < layers.length - 2; i++) {
+        input_vector = vectorReLU(
+          Matrix.add_matrices(Matrix.multiply_matrices(w[i], input_vector), b[i])
+        );
+      }
+      let output = Matrix.add_matrices(Matrix.multiply_matrices(w[layers.length - 2], input_vector), b[layers.length - 2]);
+      return softMax(output);
+    }
+
+
+
+
+
+
+    function getCheckedIndex(name) {
+      let all=document.querySelectorAll(`input[name="${name}"]`);
+      for(let i=0;i<all.length;i++) if(all[i].value==document.querySelector(`input[name="${name}"]:checked`).value) return(i);
+  } 
+
+
+    function depress_prob(a, s, d, i, c, an, g, at, st) {
+      return neural_network([a, s, d, i, c, an, g, at, st],weights,biases)[0][0];
+    }
+
+  document.body.addEventListener("click", function() {
+    try {
+      var age = getCheckedIndex('age');
+      var sadness = getCheckedIndex('sadness');
+      var dysphoria = getCheckedIndex('dysphoria');
+      var insomnia = getCheckedIndex('insomnia');
+      var cognitive_impairment = getCheckedIndex('cognitive_impairment');
+      var anorexia = getCheckedIndex('anorexia');
+      var guilt_complex = getCheckedIndex('guilt_complex');
+      var attachment_disorder = getCheckedIndex('attachment_disorder');
+      var suicidal_tendency = getCheckedIndex('suicidal_tendency');
+
+      var result = depress_prob(age, sadness, dysphoria, insomnia, cognitive_impairment, anorexia, guilt_complex, attachment_disorder, suicidal_tendency);
+      document.getElementById("result-box").innerHTML = "Depression Probability: " + result.toFixed(4);
+    } catch (err) {
+      document.getElementById("result-box").innerHTML = "...";
+    }
+  });
+
+
+</script>
+</body>
+</html>
