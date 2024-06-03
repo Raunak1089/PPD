@@ -264,7 +264,7 @@ let biases = [
       var suicidal_tendency = getCheckedIndex('suicidal_tendency');
 
       var result = depress_prob(age, sadness, dysphoria, insomnia, cognitive_impairment, anorexia, guilt_complex, attachment_disorder, suicidal_tendency);
-      document.getElementById("result-box").innerHTML = "Depression Probability: " + result.toFixed(4);
+      document.getElementById("result-box").innerHTML = "Anxiety Probability: " + result.toFixed(4);
     } catch (err) {
       document.getElementById("result-box").innerHTML = "...";
     }
